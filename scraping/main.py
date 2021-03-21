@@ -115,8 +115,8 @@ for job in range(len(jobs_keyword)):
 signinpage = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
 #account sign in
 driver.get(signinpage)
-
-driver.find_element_by_id("email").send_keys(username)
+time.sleep(1)
+driver.find_element_by_id("username").send_keys(username)
 driver.find_element_by_id("password").send_keys(password)
 driver.find_element_by_id("password").send_keys(Keys.RETURN)
 time.sleep(2)
@@ -163,5 +163,3 @@ df = df.join(dfSizeofEmployee.set_index('companyName'), on='companyName')
 df.drop_duplicates(inplace = True)
 df.drop('detailDescription', axis = 1).to_csv('output_file.csv')
 df['detailDescription'].to_json('output_detail.json')
-
-
