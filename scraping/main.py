@@ -5,168 +5,128 @@ from selenium.webdriver.common.keys import Keys
 import json
 import time
 
-homepage = 'https://www.linkedin.com/jobs?trk=homepage-basic_directory_jobsHomeUrl'
 path = 'chromedriver.exe'
 
 driver = webdriver.Chrome(path)
+signinpage = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
 
-jobs_keyword = ['data analyst', 'data scientist', 'data engineer', 'business intelligence']
-loc = 'indonesia'
+#account sign in
 email = input('linkedin email: ')
 password = input('linkedin password: ')
 
-Id = []
-companyLink = {}
-jobTitle = []
-detailDescription = []
-companyName = []
-jobPostingTime = []
-numberOfApplicants = []
-seniorityLevel = []
-sizeOfEmployee = []
-companyIndustry = []
-employmentType = []
-jobFunction = []
-links = []
-
-for job in range(len(jobs_keyword)):
-    driver.get(homepage)
-    driver.find_element_by_xpath('//*[@id="JOBS"]/section[2]/button').click()
-    search = driver.find_element_by_id('JOBS').find_elements_by_class_name('dismissable-input__input')
-    search[0].send_keys(jobs_keyword[job])
-    search[1].send_keys(loc)
-    search[1].send_keys(Keys.RETURN)
-    time.sleep(1)
-    #scroll the page from search keyword values
-    while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        try:
-            if "You've viewed all jobs for this search" in [x.text for x in driver.find_elements_by_tag_name("p")]:
-                break
-            driver.find_element_by_xpath('//*[@id="main-content"]/div/section[2]/button').click()		
-        except:
-            pass
-
-    card_list = driver.find_elements_by_class_name("result-card.job-result-card.result-card--with-hover-state")
-    links.extend([link.find_element_by_tag_name("a").get_attribute("href") for link in card_list])
-    
-links = list(set(links))
-    
-for link_idx in range(len(links)):
-    try:
-        driver.get(links[link_idx])
-        time.sleep(0.8) #time to load page estimation
-
-        Id.append(link_idx)
-        topcard_section = driver.find_element_by_class_name("topcard") 
-        job_title = topcard_section.find_element_by_class_name("topcard__title").text
-        jobTitle.append(job_title)
-        company = driver.find_element_by_class_name("topcard__flavor")
-        companyName.append(company.text)
-        
-        jobPostingTime.append(driver.find_element_by_class_name("topcard__flavor--metadata.posted-time-ago__text").text)
-        numberOfApplicants.append(driver.find_element_by_class_name("num-applicants__caption").text)
-
-        criteria = driver.find_elements_by_class_name("job-criteria__item")
-        criteria_head = ["Seniority level", "Industries", "Employment type", "Job function"]
-        criteria_list = []
-        for value in criteria:
-            key = value.find_element_by_tag_name("h3").text
-            criteria_list.append(key)
-            values = value.find_elements_by_tag_name("span")
-            if len(values) == 1:
-                value = values[0].text
-            else:
-                value = []
-                for i in values:
-                    value.append(i.text)
-            
-            if key == criteria_head[0]:
-                seniorityLevel.append(value)
-            elif key == criteria_head[1]:
-                companyIndustry.append(value)
-            elif key == criteria_head[2]:
-                employmentType.append(value)
-            elif key == criteria_head[3]:
-                jobFunction.append(value)
-                
-        criteria_not_exist = list(set(criteria_head)-set(criteria_list))
-        for x in criteria_not_exist:
-            if x == criteria_head[0]:
-                seniorityLevel.append(np.nan)
-            elif x == criteria_head[1]:
-                companyIndustry.append(np.nan)
-            elif x == criteria_head[2]:
-                employmentType.append(np.nan)
-            elif x == criteria_head[3]:
-                jobFunction.append(np.nan)
-        try:
-            driver.find_element_by_xpath("//*[contains(text(), 'Show more')]").click()
-        except:
-            pass
-
-        detailDescription.append(driver.find_element_by_class_name("show-more-less-html__markup").text)
-        ##
-        try:
-            company_link = company.find_element_by_tag_name('a').get_attribute('href')
-            companyLink[company.text] = company_link
-        except:
-            pass
-        time.sleep(1) 
-    except:
-        pass
-
-signinpage = 'https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin'
-#account sign in
 driver.get(signinpage)
 time.sleep(1)
-driver.find_element_by_id("username").send_keys(username)
+driver.find_element_by_id("username").send_keys(email)
 driver.find_element_by_id("password").send_keys(password)
 driver.find_element_by_id("password").send_keys(Keys.RETURN)
-time.sleep(2)
+input("press enter if nothing happend with your account")
 
-## sizeofemployee data pulling from company link
-sizeOfEmployee = []
-for compName in companyLink:
-    driver.get(companyLink[compName])
-    loop = False
-    while loop == False:
+jobs_keyword = ['data analyst', 'data scientist', 'data engineer', 'business intelligence']
+loc = 'indonesia'
+entity = []
+
+for job in jobs_keyword:
+    print("Job keyword on process:", job)
+    pageJobSearch = 'https://www.linkedin.com/jobs/'
+    driver.get(pageJobSearch)
+
+    #input search keyword and location
+    searchEngine = driver.find_elements_by_tag_name("input")
+
+    searchEngine[1].send_keys(job)
+    searchEngine[4].send_keys(loc)
+    searchEngine[4].send_keys(Keys.RETURN)
+    time.sleep(2)
+
+    url = driver.current_url
+
+    #maximal page in job
+    while True:
         try:
-            driver.find_elements_by_class_name("org-page-navigation__item.m0")[1].click()
-            loop = True
-        except:
-            pass
-    loop = False
-    while loop == False:
-        try:
-            text = driver.find_element_by_class_name("overflow-hidden").text.split('\n')
-            loop = True
-        except:
-            pass
-    for i in range(len(text)):
-        if 'Company size' in text[i]:
-            compsize = text[i+1] 
+            npages = int(driver.find_element_by_class_name("artdeco-pagination__pages.artdeco-pagination__pages--number").find_elements_by_tag_name("li")[-1].text)
             break
-    sizeOfEmployee.append([compName, compsize])
+        except:
+            pass
         
-data_output = {
-        'id': Id,
-        'jobTitle': jobTitle,
-	'companyName': companyName,
-	'jobPostingTime': jobPostingTime,
-	'numberOfApplicants': numberOfApplicants,
-	'seniorityLevel': seniorityLevel, 
-        'companyIndustry': companyIndustry,
-        'employmentType': employmentType,
-        'jobFunction': jobFunction,
-        'detailDescription': detailDescription
-        }
+    for page in range(0, npages*25, 25):
+        print("Page:",int(page/25),"of",npages)
+        driver.get(url+"&start="+str(page))
+        time.sleep(1)
+        
+        loop = 0 #looping for card list untill end
+        while True: 
+            try:
+                card_list = driver.find_elements_by_class_name('.'.join("disabled ember-view job-card-container__link job-card-list__title".split()))
+                current_card = card_list[loop]
+                loop+=1
+                current_card.click() 
+                time.sleep(1)
+                try:
+                    #info in top_card: job title, company name, company location, posted date, views
+                    top_card = driver.find_element_by_class_name("jobs-details-top-card__content-container").text.split('\n')
+                    jobTitle = top_card[0]
+                    for i in range(len(top_card)):
+                        if "Company Name" == top_card[i]:
+                            companyName = top_card[i+1]
+                        elif "Posted Date" == top_card[i]:
+                            postedDate = top_card[i+1]
+                            break
+                    numOfApplicants = driver.find_element_by_class_name("jobs-details-job-summary__text--ellipsis").text
+                    companyInfo = driver.find_element_by_class_name("artdeco-list__item.jobs-details-job-summary__section.jobs-details-job-summary__section--center").text
+                    sizeOfEmployee = np.nan if "employees" not in companyInfo else companyInfo.split('\n')[1]
+                    jobDescDetail = driver.find_element_by_class_name("jobs-description-details.pt4").find_elements_by_tag_name("div")
+                    dataHead = ["seniority level", "employment type", "job functions", "industry"]
+                    dataHeadInDetail = [x.text.lower().split('\n')[0] for x in jobDescDetail]
+                    for desc in jobDescDetail:
+                        head = desc.text.lower().split('\n')[0]
+                        if len(desc.find_elements_by_tag_name("li")) == 0:
+                            value = desc.text.split('\n')[1]
+                        else:
+                            value = []
+                            for x in desc.find_elements_by_tag_name("li"):
+                                value.append(x.text)
+                            value = value[0] if len(value) == 1 else value
+                        if head == dataHead[0]:
+                            seniorityLevel = value
+                        elif head == dataHead[1]:
+                            employmentType = value
+                        elif head == dataHead[2]:
+                            jobFunction = value
+                        elif head == dataHead[3]:
+                            companyIndustry = value 
+                    headNotFound = list(set(dataHead)-set(dataHeadInDetail))
+                    if len(headNotFound) > 0:
+                        for head in headNotFound:
+                            if head == dataHead[0]:
+                                seniorityLevel = np.nan
+                            elif head == dataHead[1]:
+                                employmentType = np.nan 
+                            elif head == dataHead[2]:
+                                jobFunction = np.nan 
+                            elif head == dataHead[3]:
+                                companyIndustry = np.nan
+                    detailDescription = driver.find_element_by_id("job-details").find_element_by_tag_name("span").text
 
-df = pd.DataFrame(data_output)
-dfSizeofEmployee = pd.DataFrame(sizeOfEmployee, columns = ['companyName', 'sizeOfEmployee'])
-df = df.join(dfSizeofEmployee.set_index('companyName'), on='companyName')
-df.drop_duplicates(inplace = True)
-df.drop('detailDescription', axis = 1).to_csv('output_file.csv')
-df['detailDescription'].to_json('output_detail.json')
+                    entity.append([jobTitle,
+                                   companyName,
+                                   postedDate,
+                                   numOfApplicants,
+                                   sizeOfEmployee,
+                                   seniorityLevel,
+                                   employmentType,
+                                   jobFunction,
+                                   companyIndustry,
+                                   detailDescription])
+                except:
+                    pass
+            except:
+                break
 
-
+df = pd.DataFrame(entity, columns = ['jobTitle','companyName','postedDate','numOfApplicants','sizeOfEmployee','seniorityLevel','employmentType','jobFunction','companyIndustry','detailDescription'])
+df = df.loc[df.astype(str).drop_duplicates().index]
+df.reset_index(drop = True, inplace = True)
+df_idx = pd.DataFrame(range(len(df)), columns = ['Id'])
+df = pd.concat([df_idx, df], axis = 1)
+df.drop("detailDescription", axis = 1).to_csv("data_output.csv", index = False)
+df.drop("detailDescription", axis = 1).to_excel("data_output.xlsx", index = False)
+df[['Id', 'detailDescription']].to_json("data_output.json")
