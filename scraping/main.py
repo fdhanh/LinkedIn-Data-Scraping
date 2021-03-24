@@ -130,6 +130,5 @@ df = df.loc[df.astype(str).drop_duplicates().index]
 df.reset_index(drop = True, inplace = True)
 df_idx = pd.DataFrame(range(len(df)), columns = ['Id'])
 df = pd.concat([df_idx, df], axis = 1)
-df.drop("detailDescription", axis = 1).to_csv("data_output.csv", index = False)
-df.drop("detailDescription", axis = 1).to_excel("data_output.xlsx", index = False)
+df.drop("detailDescription", axis = 1).to_csv("data_output.csv", index = False) 
 df[['Id', 'detailDescription']].to_json("data_output.json")
