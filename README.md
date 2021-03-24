@@ -8,4 +8,4 @@ You can download it on: https://chromedriver.chromium.org/downloads and dont for
 # Data Visualization
 
 ![alt text](https://github.com/fdhanh/LinkedIn_Data_Scraping/blob/main/added_file/DASHBOARD.jpeg?raw=true)
-For good experience for interactive dashboard you can go to tableau link at: https://public.tableau.com/views/LinkedInDataVisualization/Dashboard1?:language=en-GB&:display_count=y&:origin=viz_share_link
+For best experience for interactive dashboard you can go to tableau link at: https://public.tableau.com/views/LinkedInDataVisualization/Dashboard1?:language=en-GB&:display_count=y&:origin=viz_share_link
