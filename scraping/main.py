@@ -22,7 +22,7 @@ driver.find_element_by_id("password").send_keys(Keys.RETURN)
 input("press enter if nothing happend with your account")
 
 jobs_keyword = []
-for _ in range(int(input("how many keywords: ")):
+for _ in range(int(input("how many keywords: "))):
     jobs_keyword.append(input("Input job keyword: ").lower())
                
 loc = input("location: ")
@@ -63,7 +63,7 @@ for job in jobs_keyword:
                 current_card = card_list[loop]
                 loop+=1
                 current_card.click() 
-                time.sleep(1)
+                time.sleep(3)
                 try:
                     #info in top_card: job title, company name, company location, posted date, views
                     top_card = driver.find_element_by_class_name("jobs-details-top-card__content-container").text.split('\n')
