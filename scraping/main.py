@@ -21,8 +21,11 @@ driver.find_element_by_id("password").send_keys(password)
 driver.find_element_by_id("password").send_keys(Keys.RETURN)
 input("press enter if nothing happend with your account")
 
-jobs_keyword = ['data analyst', 'data scientist', 'data engineer', 'business intelligence']
-loc = 'indonesia'
+jobs_keyword = []
+for _ in range(int(input("how many keywords: ")):
+    jobs_keyword.append(input("Input job keyword: ").lower())
+               
+loc = input("location: ")
 entity = []
 
 for job in jobs_keyword:
